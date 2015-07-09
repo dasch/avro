@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'avro/logical_type'
+
 module Avro
   class Schema
     # Sets of strings, for backwards compatibility. See below for sets of symbols,
@@ -50,7 +52,9 @@ module Avro
 
         type_sym = type.to_sym
         if PRIMITIVE_TYPES_SYM.include?(type_sym)
-          return PrimitiveSchema.new(type_sym)
+          schema = PrimitiveSchema.new(type_sym)
+          schema.logical_type = LogicalType.parse(json_obj)
+          return schema
 
         elsif NAMED_TYPES_SYM.include? type_sym
           name = json_obj['name']
@@ -132,6 +136,7 @@ module Avro
     end
 
     attr_reader :type_sym
+    attr_accessor :logical_type
 
     # Returns the type as a string (rather than a symbol), for backwards compatibility.
     # Deprecated in favor of {#type_sym}.
